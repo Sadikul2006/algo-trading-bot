@@ -43,3 +43,20 @@ class GrowwClient:
     def get_positions(self) -> dict:
         """Fetches the user's current positions (CASH, FNO, COMMODITY)."""
         return self._client.get_positions_for_user()
+
+    def get_ltp(self, trading_symbol: str, exchange: str = "NSE") -> dict:
+        """
+        Fetches the Last Traded Price (LTP) for a given stock/index symbol.
+
+        Args:
+            trading_symbol: The stock symbol, e.g. "RELIANCE" or "NIFTY".
+            exchange: The exchange the symbol belongs to. Defaults to "NSE".
+
+        Returns:
+            A dictionary containing the LTP data for the requested symbol.
+        """
+        exchange_trading_symbol = f"{exchange}_{trading_symbol}"
+        return self._client.get_ltp(
+            segment=self._client.SEGMENT_CASH,
+            exchange_trading_symbols=exchange_trading_symbol,
+        )

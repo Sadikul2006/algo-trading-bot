@@ -19,5 +19,9 @@ if __name__ == "__main__":
         positions = client.get_positions()
         print(positions)
 
+        print("\nFetching LTP for RELIANCE...")
+        ltp = client.get_ltp("RELIANCE")
+        print(ltp)
+
     except Exception as e:
         print(f"❌ Something went wrong: {e}")
