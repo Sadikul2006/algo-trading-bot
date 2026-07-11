@@ -63,7 +63,7 @@ class Portfolio:
         self.open_positions[symbol] = trade
 
         if direction == "BUY":
-            self.cash_balance -= cost
+            self.cash_balance = round(self.cash_balance - cost, 2)
 
         logger.info(f"Opened {direction} position: {symbol} x{quantity} @ {entry_price}")
         return True
@@ -91,9 +91,9 @@ class Portfolio:
 
         # Return the capital (plus/minus P&L) to the cash balance
         if trade.direction == "BUY":
-            self.cash_balance += trade.quantity * exit_price
+            self.cash_balance = round(self.cash_balance + trade.quantity * exit_price, 2)
         else:  # SELL (short) — capital was never deducted, so just add P&L
-            self.cash_balance += pnl
+            self.cash_balance = round(self.cash_balance + pnl, 2)
 
         self.trade_history.append(trade)
 
