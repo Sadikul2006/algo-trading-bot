@@ -16,6 +16,9 @@ class Settings:
     GROWW_API_SECRET: str = os.getenv("GROWW_API_SECRET", "")
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
 
+    TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
+    TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "")
+
     @classmethod
     def validate(cls) -> None:
         """

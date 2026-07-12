@@ -1,10 +1,19 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from data.historical_data import fetch_historical_data
 from backtest.backtest_engine import BacktestEngine
 from backtest.performance_metrics import generate_performance_report
 from strategy.mean_reversion_strategy import MeanReversionStrategy
 
 app = FastAPI(title="Algo Trading Bot Dashboard")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/health")
@@ -18,14 +27,6 @@ def run_backtest(symbol: str, period: str = "1y") -> dict:
     """
     Runs a backtest for the given stock symbol using the Mean Reversion
     strategy, and returns the performance report along with trade details.
-
-    Args:
-        symbol: Stock symbol without exchange suffix (e.g. "RELIANCE").
-        period: How far back to fetch data (e.g. "1y", "6mo"). Optional
-                query parameter, defaults to "1y".
-
-    Returns:
-        A JSON object with performance metrics and a list of trades.
     """
     try:
         data = fetch_historical_data(symbol, period=period, interval="1d")
