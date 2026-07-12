@@ -5,3 +5,4 @@ growwapi
 yfinance
 fastapi
 uvicorn
+sqlalchemy
