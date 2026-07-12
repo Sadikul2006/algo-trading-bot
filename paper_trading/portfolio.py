@@ -1,5 +1,7 @@
 import logging
 from paper_trading.trade import Trade
+from database.db import get_session
+from database.models import TradeRecord
 
 logger = logging.getLogger(__name__)
 
@@ -10,10 +12,11 @@ class Portfolio:
     and trade history. This is the core of the paper trading engine.
     """
 
-    def __init__(self, starting_balance: float) -> None:
+    def __init__(self, starting_balance: float, use_database: bool = False) -> None:
         """
         Args:
             starting_balance: The initial virtual cash balance.
+            use_database: If True, persists trades to the database.
         """
         if starting_balance <= 0:
             raise ValueError("Starting balance must be positive.")
@@ -22,6 +25,7 @@ class Portfolio:
         self.cash_balance = starting_balance
         self.open_positions: dict[str, Trade] = {}
         self.trade_history: list[Trade] = []
+        self.use_database = use_database
 
     def open_position(self, symbol: str, quantity: int, entry_price: float,
                        stop_loss_price: float, target_price: float,
@@ -96,6 +100,8 @@ class Portfolio:
             self.cash_balance = round(self.cash_balance + pnl, 2)
 
         self.trade_history.append(trade)
+        if self.use_database:
+            self._save_trade_to_db(trade)
 
         logger.info(f"Closed {symbol} @ {exit_price} ({exit_reason}) | P&L: {pnl}")
         return pnl
@@ -112,3 +118,30 @@ class Portfolio:
         """
         open_value = sum(pos.quantity * pos.entry_price for pos in self.open_positions.values())
         return round(self.cash_balance + open_value, 2)
+
+
+    def _save_trade_to_db(self, trade: Trade) -> None:
+        """Persists a completed trade to the database."""
+        session = get_session()
+        try:
+            record = TradeRecord(
+                symbol=trade.symbol,
+                direction=trade.direction,
+                quantity=trade.quantity,
+                entry_price=trade.entry_price,
+                stop_loss_price=trade.stop_loss_price,
+                target_price=trade.target_price,
+                entry_time=trade.entry_time,
+                exit_price=trade.exit_price,
+                exit_time=trade.exit_time,
+                exit_reason=trade.exit_reason,
+                pnl=trade.calculate_pnl(),
+                is_open=trade.is_open,
+            )
+            session.add(record)
+            session.commit()
+            logger.info(f"Trade saved to database: {trade.symbol}")
+        except Exception as e:
+            logger.error(f"Failed to save trade to database: {e}")
+        finally:
+            session.close()
