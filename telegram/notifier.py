@@ -45,3 +45,58 @@ class TelegramNotifier:
         except requests.RequestException as e:
             logger.error(f"Failed to send Telegram message: {e}")
             return False
+
+    def send_trade_alert(self, symbol: str, direction: str, quantity: int,
+                          price: float, reason: str = "") -> bool:
+        """
+        Sends a formatted trade alert (BUY/SELL execution).
+
+        Args:
+            symbol: The stock symbol traded.
+            direction: "BUY" or "SELL".
+            quantity: Number of shares traded.
+            price: The execution price.
+            reason: Optional reason (e.g. "TARGET", "STOP_LOSS") for exits.
+        """
+        emoji = "🟢" if direction == "BUY" else "🔴"
+        message = (
+            f"{emoji} TRADE ALERT: {direction}\n"
+            f"Symbol: {symbol}\n"
+            f"Quantity: {quantity}\n"
+            f"Price: ₹{price}"
+        )
+        if reason:
+            message += f"\nReason: {reason}"
+
+        return self.send_message(message)
+
+    def send_error_alert(self, error_message: str) -> bool:
+        """
+        Sends a formatted error alert.
+
+        Args:
+            error_message: Description of the error that occurred.
+        """
+        message = f"⚠️ ERROR ALERT\n{error_message}"
+        return self.send_message(message)
+
+    def send_daily_report(self, total_trades: int, total_pnl: float, win_rate: float) -> bool:
+        """
+        Sends a formatted end-of-day summary report.
+
+        Args:
+            total_trades: Number of trades executed today.
+            total_pnl: Total profit/loss for the day.
+            win_rate: Percentage of winning trades.
+        """
+        emoji = "📈" if total_pnl >= 0 else "📉"
+        message = (
+            f"{emoji} DAILY REPORT\n"
+            f"Total Trades: {total_trades}\n"
+            f"Win Rate: {win_rate}%\n"
+            f"Total P&L: ₹{total_pnl}"
+        )
+        return self.send_message(message) 
+
+        
+           
