@@ -4,6 +4,7 @@ from data.historical_data import fetch_historical_data
 from backtest.backtest_engine import BacktestEngine
 from backtest.performance_metrics import generate_performance_report
 from strategy.mean_reversion_strategy import MeanReversionStrategy
+from dashboard.bot_state import bot_state
 
 app = FastAPI(title="Algo Trading Bot Dashboard")
 
@@ -14,6 +15,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 
 @app.get("/health")
